@@ -329,7 +329,7 @@ spec:
   replicas: 1
   selector:
    matchLabels:
-    name: sock-shop
+    name: orders
   template:
     metadata:
       labels:
