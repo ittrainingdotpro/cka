@@ -1,0 +1,39 @@
+$script = <<-SCRIPT
+useradd -p $(openssl passwd -1 student) student
+echo "root:student" | chpasswd
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl restart sshd.service
+apt-get update
+apt-get install -y docker.io
+echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kube.list
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+apt-get update
+apt-get install -y kubeadm kubelet kubectl
+echo 192.168.56.10 k-master pod1 > /etc/hosts
+echo 192.168.56.11 k-node1 pod2 > /etc/hosts
+echo 192.168.56.12 k-node2 pod3 > /etc/hosts
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "master1" do |subconfig|
+   subconfig.vm.box = "ubuntu/xenial64"
+   subconfig.vm.network "private_network", :name => 'vboxnet0', ip: "192.168.56.13", :adapter => 2
+   subconfig.vm.hostname = "k-master2"
+   subconfig.vm.provider "virtualbox" do |v|
+   v.name = "pod4"
+   v.memory = 2048
+   v.cpus = 1
+  end
+  end
+  config.vm.define "master2" do |subconfig|
+   subconfig.vm.box = "ubuntu/xenial64"
+   subconfig.vm.network "private_network", :name => 'vboxnet0', ip: "192.168.56.14", :adapter => 2
+   subconfig.vm.hostname = "k-master3"
+   subconfig.vm.provider "virtualbox" do |v|
+   v.name = "pod5"
+   v.memory = 2048
+   v.cpus = 1
+  end
+  end
+  config.vm.provision "shell", inline: $script
+end
